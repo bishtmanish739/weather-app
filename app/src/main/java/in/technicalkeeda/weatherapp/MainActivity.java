@@ -1,5 +1,6 @@
 package in.technicalkeeda.weatherapp;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,26 +24,35 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URL;
+import java.text.DecimalFormat;
 
 public class MainActivity extends AppCompatActivity {
-    public  class Event {
-        String main="errod";
+    private  class Event {
+        String main="error";
         String descreption="error";
         String name="error";
 
 
 
     }
-
+        static  String name;
+        static  String main;
+       static String descreption;
     EditText editText;
-    Event event=new Event();
+     Event event=new Event();
     private  static  String callingurl="http://api.openweathermap.org/data/2.5/weather?q=";
     private  static String apiid="&appid=4940715a24f242f0e6010ebb3efe322f";
     public  void updateui(Event Result){
-        TextView textView1=findViewById(R.id.displayresult);
-        String s=Result.name+"\n"+Result.descreption+"\n"+Result.main+"\n";
-        Log.d("msg",s);
-        textView1.setText(s);
+        Intent intent =new Intent(this,resultAcitivity.class);
+        name=Result.name;
+        main=Result.main;
+        descreption=Result.descreption;
+        intent.putExtra("name",name);
+        intent.putExtra("descreption",descreption);
+        intent.putExtra("main",main);
+
+        startActivity(intent);
+
 
     }
     public  void btnclicked(View view){
@@ -56,7 +66,12 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(JSONObject response) {
                 try {
                     if (response.getInt("cod") == 401 || response.getInt("cod") == 404) {
-                        Toast.makeText(MainActivity.this, "some error occured please enter valid city name ", Toast.LENGTH_SHORT).show();
+                       // Toast.makeText(MainActivity.this, "something went wrong please enter valid city or check your internet connection ", Toast.LENGTH_SHORT).show();
+                        event.descreption="something went wrong please enter valid city or check your internet connection";
+                        event.main="";
+                        event.name="";
+                        updateui(event);
+
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -94,13 +109,36 @@ public class MainActivity extends AppCompatActivity {
 
                 try{
                     event.name= response.getString("name");
-                    updateui(event);
+
+
+
+                }
+                catch (JSONException e){
+
+                }
+               try{
+                    JSONObject temp=response.getJSONObject("main");
+                    try{
+                        DecimalFormat two = new DecimalFormat("0.00");
+                        double d=temp.getDouble("temp");
+                      d=d-275.15;
+                      int k=(int)d;
+
+                        // d=Math.round(d * 100D) / 100D;
+                        event.descreption+="\ntemp "+ k +" °C";
+
+
+                    }
+                    catch (JSONException e){
+
+                    }
+
                 }
                 catch (JSONException e){
 
                 }
 
-
+                updateui(event);
 
 
 
@@ -109,7 +147,12 @@ public class MainActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(MainActivity.this, "error could not find city please enter another city", Toast.LENGTH_SHORT).show();
+               // Toast.makeText(MainActivity.this, "error could not find city please enter another city", Toast.LENGTH_SHORT).show();
+                event.descreption="something went wrong please enter valid city or check your internet connection";
+                event.main="";
+                event.name="";
+                updateui(event);
+
             }
         });
         requestQueue.add(jsonObjectRequest);
@@ -129,14 +172,14 @@ public class MainActivity extends AppCompatActivity {
        // imageView.setImageResource(R.drawable.weatherbackgroud);
     }
 
-    public  class DownloadTast extends AsyncTask<String,Void,Event>{
+   /* public  class DownloadTast extends AsyncTask<String,Void,Event>{
         public Event event=new Event();
         @Override
         protected Event doInBackground(String... urls) {
            String url;
 
            url=urls[0];
-           /* RequestQueue requestQueue;
+           *//* RequestQueue requestQueue;
             requestQueue = Volley.newRequestQueue(getApplicationContext());
             final JsonObjectRequest jsonObjectRequest=new JsonObjectRequest(Request.Method.GET, "http://api.openweathermap.org/data/2.5/weather?q=delhi&appid=4940715a24f242f0e6010ebb3efe322f", null, new Response.Listener<JSONObject>() {
                @Override
@@ -182,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
                    Toast.makeText(MainActivity.this, "error could not find city please enter another city", Toast.LENGTH_SHORT).show();
                }
            });
-            requestQueue.add(jsonObjectRequest);*/
+            requestQueue.add(jsonObjectRequest);*//*
 
 
 
@@ -197,5 +240,5 @@ public class MainActivity extends AppCompatActivity {
             updateui(event);
 
         }
-    }
+    }*/
 }
